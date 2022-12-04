@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy
 from pathlib import Path
+import logging
 
 
 def spine_coordinate_extraction(
@@ -74,14 +75,23 @@ def spine_image_segmentation(
             x, y, w, h = cv2.boundingRect(contours[i])
 
             # 背表紙画像を保存
-            cv2.imwrite(str(Path(spin_image_path, str(spines_count) + '.jpg')),
-                        image_data[y:y + h, x:x + w])
+            spine_output_path = str(
+                Path(spin_image_path, str(spines_count) + '.jpg'))
+            cv2.imwrite(spine_output_path, image_data[y:y + h, x:x + w])
+
+            logging.debug(f"save spine : {spine_output_path}")
 
             # 抽出数をインクリメント
             spines_count = spines_count + 1
 
+    logging.info(f"こちらに背表紙画像が格納されました : {spin_image_path}")
+
+
 if __name__ == "__main__":
+    # デバッグ用
+    logging.basicConfig(encoding='utf-8', level=logging.DEBUG)
     img_path = ""
     img_data = cv2.imread(img_path, cv2.IMREAD_COLOR)
-    contours = spine_coordinate_extraction(img_data)
-    spine_image_segmentation(img_data, contours)
+    contours_1 = spine_coordinate_extraction(img_data, 50)
+    contours_2 = spine_coordinate_extraction(img_data, 240)
+    spine_image_segmentation(img_data, (contours_1 + contours_2))
