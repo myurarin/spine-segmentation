@@ -24,6 +24,8 @@ def spine_coordinate_extraction(
     -------
     tuple
         背表紙座標データ
+    numpy.ndarray
+        二値化画像
     """
     # グレイスケールに変換
     grayscale_data = cv2.cvtColor(image_data, cv2.COLOR_BGR2GRAY)
@@ -36,7 +38,7 @@ def spine_coordinate_extraction(
     contours, hierarchy = cv2.findContours(
         bw_data, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 
-    return contours
+    return contours, bw_data
 
 
 def spine_image_segmentation(
@@ -59,11 +61,14 @@ def spine_image_segmentation(
 
     Returns
     -------
-    tuple
-        背表紙座標データ
+    numpy.ndarray
+        抽出座標入の背表紙画像
     """
     # 検出された背表紙数の初期化
     spines_count = 0
+
+    # 座標が格納された画像の初期化
+    spine_coordinate_image = image_data
 
     for i in range(len(contours)):
         # 輪郭の領域を計算
@@ -73,6 +78,8 @@ def spine_image_segmentation(
         if (spines_min_size < area and area < spines_max_size) and len(contours[i]):
             # 四隅を抽出
             x, y, w, h = cv2.boundingRect(contours[i])
+
+            cv2.rectangle(spine_coordinate_image, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
             # 背表紙画像を保存
             spine_output_path = str(
@@ -85,6 +92,8 @@ def spine_image_segmentation(
             spines_count = spines_count + 1
 
     logging.info(f"こちらに背表紙画像が格納されました : {spin_image_path}")
+
+    return spine_coordinate_image
 
 
 if __name__ == "__main__":

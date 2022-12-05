@@ -45,8 +45,18 @@ if __name__ == "__main__":
     logging.info("処理を開始します")
 
     img_data = cv2.imread(img_path, cv2.IMREAD_COLOR)
-    contours_1 = spine_coordinate_extraction(img_data, 50)
-    contours_2 = spine_coordinate_extraction(img_data, 240)
-    spine_image_segmentation(img_data, (contours_1 + contours_2), out_path)
+    contours_1, bw_1 = spine_coordinate_extraction(img_data, 50)
+    contours_2, bw_2 = spine_coordinate_extraction(img_data, 190)
+
+    spine_merge_img = spine_image_segmentation(img_data, (contours_1 + contours_2), out_path)
+
+    if args.debug:
+        cv2.imshow('bw_1', bw_1)
+        cv2.imshow('bw_2', bw_2)
+        cv2.imshow('spine', spine_merge_img)
+        # Window wait
+        cv2.waitKey(0)
+        # 終了処理
+        cv2.destroyAllWindows()
 
     logging.info("処理が完了しました")
